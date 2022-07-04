@@ -76,9 +76,9 @@ def AMR_field(start,end,datapoint):
 #%%
 for i in tqdm(range(1),desc='measurement',leave = False):
     print('{}回目'.format(i))
-    field,data=AMR_field(-1.5,1.5,100)
+    field,data=AMR_field(-8,8,100)
     time.sleep(5)
-    field2,data2=AMR_field(1.5,-1.5,100)
+    field2,data2=AMR_field(8,-8,100)
     plt.plot(field,data,'or')
 
     plt.plot(field2,data2,'ob')

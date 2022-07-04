@@ -93,11 +93,11 @@ def current_sweep2(start, end, datapoints):
     keithley2450.write(":SOUR:CURR %f" %0)
     return current, data
 #%%
-set_angle(30)
-dif_angle_move(0.1)
+#set_angle(30)
+dif_angle_move(-1)
 #%% test switching 
-I1,V1= current_sweep(5, -5, 40)
-I2,V2= current_sweep(-5, 5, 40)
+I1,V1= current_sweep(25, -25, 40)
+I2,V2= current_sweep(-25, 25, 40)
 #%% test switching draw result
 I1,I2 = np.array(I1),np.array(I2)
 V1,V2 = np.array(V1), np.array(V2)
@@ -112,8 +112,8 @@ plt.xlabel('current I (mA)',fontsize=20)
 plt.ylabel('$V_{xy} $ (mV)',fontsize=20)
 plt.show()
 # %%
-I1,R1= current_sweep2(10.5, -10.5, 100)
-I2,R2= current_sweep2(-10.5, 10.5, 100)
+I1,R1= current_sweep2(20, -20, 20)
+I2,R2= current_sweep2(-20, 20, 20)
 
 # %%
 %matplotlib inline

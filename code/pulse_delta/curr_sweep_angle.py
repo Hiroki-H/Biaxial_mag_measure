@@ -47,8 +47,8 @@ port = "COM3"  # depends on your environment
 controller = GSC01(port) #default baudrate=9600
 #%%
 # Return to mechanical origin 
-controller.return_origin()
-controller.sleep_until_stop()
+# controller.return_origin()
+# controller.sleep_until_stop()
 #%%
 def first_set_angle(angle):
     # initialize position
@@ -78,7 +78,6 @@ def set_angle(set_angle):
 
 
 
-
 #%%
 DELTA_COUNT4FLIP = 1 #pulse count
 # DELTA_DELAY = 100e-6
@@ -87,7 +86,6 @@ DELTA_DELAY = 16e-6
 PULSE_WIDTH = 50e-6
 DELTA_COUNT4MEAS = 10
 TRACE_POINT4MEAS = 10
-DELTA_COUNT4FLIP = 1
 FLIP_TIME = 5
 MEAS_TIME = 5
 CURR_LOW = 0 # 0-CURR_HIGH pulse
@@ -153,13 +151,21 @@ def update(x1,y1):
     pg.QtGui.QApplication.processEvents()    # you MUST process the plot now
 
 def angle_dep(angle_amplitude,step_angle,start_cur,end_cur,datapoints):
-    dif_angle_move(angle_amplitude//2)
-    for dif_angle in np.arange(0,angle_amplitude,step_angle):
+    dif_angle_move(-angle_amplitude//2)
+    for dif_angle in numpy.arange(0,angle_amplitude,step_angle):
         dif_angle_move(dif_angle)
-        cur1,write_volt1,read_volt1,Resi1=pulse_delta(start_cur, end_cur, data_points)
+        cur1,write_volt1,read_volt1,Resi1=pulse_delta(start_cur=start_cur, end_cur=end_cur, data_points=datapoints)
+        cur2,write_volt2,read_volt2,Resi2=pulse_delta(start_cur=-start_cur, end_cur=-end_cur, data_points=datapoints)
         plt.plot(cur1,Resi1,'o-')
+        plt.plot(cur2,Resi2,'o-')
         plt.show()
-
+        time.sleep(3)
+        plt.close()
+        data=[cur1,Resi1,cur2,Resi2]
+        df=pd.DataFrame(data)
+        df=df.transpose()
+        df.columns=['current_- to +(A)','Resi_- to +(ohm)','current_+ to -(A)','Resi_+ to -(ohm)']
+        df.to_csv(f'./result/MS_switching_{dif_angle:.3f}deg.csv',index=False)
 
 if __name__ == '__main__':
     ### START QtApp #####
@@ -172,20 +178,9 @@ if __name__ == '__main__':
     p.showGrid(x=True,y=True)
     p.setLabel('left', "Resistance", units='ohm')
     p.setLabel('bottom', "Current", units='A')
-    cur1,write_volt1,read_volt1,Resi1=pulse_delta(-30e-3,30e-3,11)
-    #cur2,write_volt2,read_volt2,Resi2=pulse_delta(18e-3,-18e-3,10)
-    plt.plot(cur1,Resi1,'o-')
-    #plt.plot(cur2,Resi2,'o-')
-    #plt.xlim(-0.078,0.08)
-    #plt.ylim(190,194)
-    plt.show()
+    angle_dep(angle_amplitude=5, step_angle=1, start_cur=-30e-3, end_cur=30e-3, datapoints=1)
 
-    data=[cur1,Resi1,cur2,Resi2]
-    df=pd.DataFrame(data)
-    df=df.transpose()
-    df.columns=['current_- to +(A)','Resi_- to +(ohm)','current_+ to -(A)','Resi_+ to -(ohm)']
-    df
-    df.to_csv('AMR_1mA_test.csv',index=False)
+    #df.to_csv('AMR_1mA_test.csv',index=False)
     ke_6221.close()
 # %%
 
