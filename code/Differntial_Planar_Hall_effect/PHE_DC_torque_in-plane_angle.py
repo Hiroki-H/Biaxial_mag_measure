@@ -80,7 +80,7 @@ controller.sleep_until_stop()
 
 #%%
 
-def PHE_SOT(field,current):
+def PHE_SOT(field,current,waittime):
     adc_IP.write('SOV%f' %field)
     time.sleep(5)
     angle=[]
@@ -89,12 +89,12 @@ def PHE_SOT(field,current):
     Diff = []
     for i in tqdm(np.linspace(0, 350,117),leave= False):
         keithley2450.write(":SOUR:CURR %f" %(current*1e-3))
-        time.sleep(3)
+        time.sleep(waittime)
         Ip=float(keithley2450.query("measure:current?"))
         Voltp=float(keithley2182A.query(":SENSe:Data?"))
 
         keithley2450.write(":SOUR:CURR %f" %(-current*1e-3))
-        time.sleep(3)
+        time.sleep(waittime)
         Im=float(keithley2450.query("measure:current?"))
         Voltm=float(keithley2182A.query(":SENSe:Data?"))
         dif_angle= 3#deg
@@ -115,15 +115,14 @@ def PHE_SOT(field,current):
 #%%
 dif_angle_move(-2)
 #%%
-angle,Rp,Rm,Diff=PHE_SOT(6,15)
-dif_angle_move(-350)
+angle,Rp,Rm,Diff=PHE_SOT(6,25,0.5)
+dif_angle_move(-352)
 # angle1,R1=PHE_SOT(1,-30)
 # dif_angle_move(-350)
 #%%
 
 #%%
 %matplotlib inline
-R = np.array(R)
 #R1 = np.array(R1)
 plt.plot(angle,Rp,'or',markersize=6)
 plt.plot(angle,Rm,'ob',markersize=6)
@@ -131,18 +130,19 @@ plt.show()
 plt.plot(angle,Diff,'ok',markersize=6)
 #plt.plot(angle1,R1,'ob',markersize=6)
 # %%
-path='C:/Users/keioa/OneDrive/デスクトップ/member/hayashi/Experiment/20220819/sub_Pt(5)_Ni(5)'
-for current in np.linspace(11,20,7):
-    angle,Rp,Rm,Diff=PHE_SOT(6,current)
+path='C:/Users/keioa/OneDrive/デスクトップ/member/hayashi/Experiment/20220819/sub_Pt(5)_Py(5)'
+for current in np.linspace(15,25,7):
+    angle,Rp,Rm,Diff=PHE_SOT(6,current,1.5)
     dif_angle_move(-352)
+    plt.plot(angle,Diff,'ok',markersize=6)
+    plt.show()
     cur= [current]*len(Rp)
     Z=[angle,cur,Rp,Rm,Diff]
     df_PHE=pd.DataFrame(Z)
     df_PHE=df_PHE.transpose()
     df_PHE.columns=['angle(deg)','current(mA)','Rp(ohm)','Rm(ohm)', 'Diff (ohm)']
-    df_PHE.to_csv(path+'/SW_+{:.3f}mT_{:.2f}mA.csv'.format(202,current),index=False)
-# %%
-print('/SW_+{:.3f}mT_{:.2f}mA.csv'.format(150,current))
+    df_PHE.to_csv(path+'/DPHE_+{:.3f}mT_{:.2f}mA.csv'.format(202,current),index=False)
+
 #%%
 for current in np.linspace(14,20,7):
     print(current)
@@ -214,7 +214,7 @@ def PHE_SOT_field_dep(start_field, end_field, points, current, path,f):
 #%% IV measurement for elctric field
 I_s=[]
 V_s=[]
-for i in tqdm(np.linspace(-20,20,80), leave=False):
+for i in tqdm(np.linspace(-40,40,80), leave=False):
     keithley2450.write(":SOUR:CURR " + str(i*1e-3))
     time.sleep(1)
     I=float(keithley2450.query("measure:current?"))
@@ -277,3 +277,5 @@ df_AHE=pd.DataFrame(Z)
 df_AHE=df_AHE.transpose()
 df_AHE.columns=['field_- to +','Resi_- to +(ohm)','field_+ to -','Resi_+ to -(ohm)']
 df_AHE.to_csv(path+'/AHE_{:.2f}mA_-start.csv'.format(1),index=False)
+
+# %%
